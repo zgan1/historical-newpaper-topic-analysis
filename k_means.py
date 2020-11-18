@@ -1,12 +1,12 @@
 import numpy as np
-from numba import njit
+from numba import njit, prange
 
 
 def normalize_rows(v):
     return v / (1e-30 + np.linalg.norm(v, axis=1)[:, np.newaxis])
 
 
-def train_k_means(matrix, n_clusters, eps=1e-9, max_iter=100):
+def train(matrix, n_clusters, eps=1e-9, max_iter=100):
     """
     Args:
         matrix: scipy.sparse.coo_matrix of shape (n,d). Each row represents a data point.
@@ -25,13 +25,28 @@ def train_k_means(matrix, n_clusters, eps=1e-9, max_iter=100):
     col = matrix.col
     data = matrix.data.astype(float)
 
-    initial_centroids = normalize_rows(np.random.rand(n_clusters, d))
+    # Initialize the centroids with a random subset of data points
+    indices = np.arange(n)
+    np.random.shuffle(indices)
+    subset = indices[0:n_clusters]
+    initial_centroids = np.empty((n_clusters, d))
+    initialize(initial_centroids, subset, row, col, data)
+    initial_centroids = normalize_rows(initial_centroids)
 
-    return train_k_means_sparse(row, col, data, n, d, initial_centroids, n_clusters, eps, max_iter)
+    return k_means_sparse(row, col, data, n, d, initial_centroids, n_clusters, eps, max_iter)
 
 
 @njit
-def train_k_means_sparse(row, col, data, n, d, initial_centroids, n_clusters, eps, max_iter):
+def initialize(initial_centroids, subset, row, col, data):
+    for i in range(data.size):
+        for j, r in enumerate(subset):
+            if row[i] == r:
+                initial_centroids[j, col[i]] = data[i]
+                break
+
+
+@njit(parallel=True)
+def k_means_sparse(row, col, data, n, d, initial_centroids, n_clusters, eps, max_iter):
     nnz = data.size
 
     # Normalize the data matrix
@@ -57,7 +72,7 @@ def train_k_means_sparse(row, col, data, n, d, initial_centroids, n_clusters, ep
 
         # Compute new labels
         product[:] = 0
-        for c in range(n_clusters):
+        for c in prange(n_clusters):
             for i in range(nnz):
                 product[row[i], c] += data[i] * centroids[c, col[i]]
         for i in range(n):

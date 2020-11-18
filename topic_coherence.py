@@ -45,10 +45,11 @@ def topic_coherence(doc_word_matrix, n_words, topic_words):
     return coherence
 
 
-def main(n_common_words, model_names, n_topics, corpus_names):
+def plot_coherence_scores_distribution(n_common_words, model_names, n_topics, corpus_names):
     base_dir = os.getcwd()
     vocab_dir = 'vocabulary_files'
     model_dir = 'models'
+    output_dir = 'coherence'
 
     for corpus_name in corpus_names:
         doc_word_file = os.path.join(base_dir, vocab_dir, corpus_name, corpus_name + '_matrix.npz')
@@ -87,15 +88,55 @@ def main(n_common_words, model_names, n_topics, corpus_names):
                 plt.plot(n_topics, q3_coherence_scores[:, i], label="Third quartile")
                 plt.plot(n_topics, median_coherence_scores[:, i], label="Median")
                 plt.plot(n_topics, q1_coherence_scores[:, i], label="First quartile")
-                plt.legend(loc='lower left')
-                plt.savefig(os.path.join(base_dir, f"{corpus_name}_{model_name}_top_{n}_words_coherence.png"))
+                plt.legend()
+                plt.savefig(os.path.join(base_dir, output_dir, f"{corpus_name}_{model_name}_top_{n}_words_coherence.png"))
+                plt.close()
+
+                with open(os.path.join(base_dir, output_dir,
+                                       f"{corpus_name}_{model_name}_top_{n}_words_coherence.txt"), "wb") as f:
+                    pickle.dump([coherence_scores[j][:, i] for j, _ in enumerate(n_topics)], f)
+
+
+def plot_number_coherent_topics(corpus_names, model_names, n_common_words):
+    base_dir = os.getcwd()
+    output_dir = 'coherence'
+
+    for corpus_name in corpus_names:
+        for model_name in model_names:
+            for n in n_common_words:
+                with open(os.path.join(base_dir, output_dir,
+                                       f"{corpus_name}_{model_name}_top_{n}_words_coherence.txt"), "rb") as f:
+                    coherence_scores = pickle.loads(f.read())
+
+                n_topics = [s.shape[0] for s in coherence_scores]
+
+                mid = len(coherence_scores) // 2
+                thresholds = [np.quantile(coherence_scores[mid], 0.15 * i) for i in range(1, 7)]
+
+                plt.figure()
+                plt.xlabel("Total number of topics")
+                plt.xticks(n_topics)
+                plt.ylabel("Number of topics with coherence above threshold")
+                for threshold in thresholds:
+                    plt.plot(n_topics, [np.count_nonzero(s > threshold) for s in coherence_scores],
+                             label="Threshold = {0:.1f}".format(threshold))
+                plt.legend()
+                plt.savefig(os.path.join(base_dir, output_dir,
+                                         f"{corpus_name}_{model_name}_topics_above_threshold.png"))
                 plt.close()
 
 
+def main():
+    plot_coherence_scores_distribution(n_common_words=[30],
+                                       model_names=["k_means", "lda", "pLSA"],
+                                       n_topics=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
+                                       corpus_names=["National_Gazette", "Gazette_of_US"])
+    plot_number_coherent_topics(corpus_names=["National_Gazette", "Gazette_of_US"],
+                                model_names=["k_means", "lda", "pLSA"],
+                                n_common_words=[30])
+
+
 if __name__ == "__main__":
-    main(n_common_words=[10, 15, 20, 25, 30, 35, 40],
-         model_names=["lda", "pLSA", "k_means"],
-         n_topics=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
-         corpus_names=["National_Gazette"])
+    main()
 
 

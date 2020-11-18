@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.sparse as sparse
-from numba import njit
+from numba import njit, prange
 import scipy.special as sc
 import matplotlib.pyplot as plt
 import time
@@ -54,6 +54,7 @@ def initialize(N, topic_doc, word_topic, topic_count, doc, word, topic):
         word_topic[word[i], topic[i]] += 1
         topic_count[topic[i]] += 1
 
+
 @njit
 def gibbs_sampling(N, vocab_size, n_topics, doc, word, topic, prob,
                    topic_doc, word_topic, topic_count, alpha, beta, n_iter):
@@ -74,10 +75,6 @@ def gibbs_sampling(N, vocab_size, n_topics, doc, word, topic, prob,
 
             # Sampling
             u = np.random.rand()
-            # for k in range(n_topics):
-            #     if u < prob[k] / prob[n_topics - 1]:
-            #         topic[i] = k
-            #         break
 
             k_low, k_up = -1, n_topics
             while k_up - k_low > 1:

@@ -25,7 +25,7 @@ def train(model_name, n_topics, n_runs, doc_word_matrix, model_file, topic_doc_f
         if model_name == "pLSA":
             objective, model, topic_given_doc = pLSA.train(doc_word_matrix, n_topics)
         elif model_name == "k_means":
-            objective, model, topic_given_doc = k_means.train_k_means(doc_word_matrix, n_topics, eps=1e-9)
+            objective, model, topic_given_doc = k_means.train(doc_word_matrix, n_topics, eps=1e-9)
         else:
             objective, model, topic_given_doc = lda.train(doc_word_matrix, n_topics, alpha=2, beta=0.01, n_iter=250)
 
@@ -166,9 +166,9 @@ def main(n_topics=[5],
 
 
 if __name__ == "__main__":
-    main(corpus_names=['Pennsylvania_Gazette'],
-         n_topics=[40],
+    main(corpus_names=['National_Gazette', 'Gazette_of_US', 'Pennsylvania_Gazette'],
+         n_topics=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
          n_common_words=30,
-         plsa_runs=1,
-         k_means_runs=1,
-         lda_runs=1)
+         plsa_runs=0,
+         k_means_runs=0,
+         lda_runs=0)
