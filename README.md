@@ -12,7 +12,7 @@ train.py [depends on k_means.py, pLSA.py and lda.py, each file implements the co
 
 Trains the models and saves the results in the 'models' folder. The values of the objective function and the execution time are plotted and saved in the 'stats' folder.
 The most important words in each topic are saved in the 'top_words' folder.
-
+All training models are bag-of-words models.
 
 topic_coherence.py:
 
