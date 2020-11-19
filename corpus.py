@@ -9,13 +9,9 @@ from symspellpy import SymSpell, Verbosity
 
 class Corpus:
     """
-    This class preprocesses a corpus in the form of txt files in a single
-    directory. The `create_corpus` method tokenizes the corpus within each
-    document. The `get_vocabulary` method creates a vocabulary of the method
-    by using stemming and removing stopwords.
-    The text_to_matrix methods converts a corpus to a word count matrix.
+    This class preprocesses a corpus in the form of txt files to generate
+    a vocabulary and a document word matrix.
     """
-
     def __init__(self, raw_corpus, corpus_file, stopwords_file, vocab_file, stems_file, matrix_file):
         self.raw_corpus = raw_corpus
         self.corpus_file = corpus_file
@@ -33,6 +29,9 @@ class Corpus:
         self.vocab_size = 0
 
     def create_corpus(self):
+        """
+        Creates a corpus from a list of files.
+        """
         for file_path in self.raw_corpus:
             with open(file_path, encoding='utf8') as f_input:
                 doc = nltk.wordpunct_tokenize(f_input.read())
@@ -46,6 +45,10 @@ class Corpus:
         print("done.")
 
     def spellchecking(self, raw_vocab):
+        """
+        :param raw_vocab: a set raw vocabularies to be preprocessed.
+        :return: a dictionary from the raw vocabulary to the corrected vocabulary.
+        """
         sym_spell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
         dictionary_path = pkg_resources.resource_filename(
             "symspellpy", "frequency_dictionary_en_82_765.txt")
@@ -54,18 +57,21 @@ class Corpus:
         print("start spellcheck timing")
         start = time.perf_counter()
         for element in raw_vocab:
-            input = element
-            suggestions = sym_spell.lookup(input, Verbosity.TOP, include_unknown=False,
+            input_word = element
+            suggestions = sym_spell.lookup(input_word, Verbosity.TOP, include_unknown=False,
                                            max_edit_distance=2)
             if len(suggestions) > 0:
-                raw_to_correct[input] = suggestions[0].term
+                raw_to_correct[input_word] = suggestions[0].term
             else:
-                raw_to_correct[input] = ""
+                raw_to_correct[input_word] = ""
         end = time.perf_counter()
         print("end timing: ", end-start)
         return raw_to_correct
 
     def get_raw_vocabulary(self):
+        """
+        Gets the raw vocabulary of a corpus.
+        """
         raw_vocab = set()
         for document in self.corpus:
             for word in document:
@@ -78,11 +84,20 @@ class Corpus:
             self.stopwords = stopwords.read().split()
 
     def preprocess(self):
+        """
+        preprocess a corpus to get the vocabulary of a corpus.
+        """
         raw_vocab = self.get_raw_vocabulary()
         raw_to_correct = self.spellchecking(raw_vocab)
         self.get_vocabulary(self.stopwords, raw_to_correct)
 
     def get_vocabulary(self, stopwords, raw_to_correct):
+        """
+        Performs stemming and frequency capping for a vocabulary. Generates a index to word dictionary
+        and a word to index dictionary.
+        :param stopwords: a list of stopwords
+        :param raw_to_correct: a raw vocabulary to corrected vocabulary dictionary
+        """
         frequencies = {}
         porter = nltk.PorterStemmer()
         for document in self.corpus:
@@ -97,7 +112,7 @@ class Corpus:
         for document in self.corpus:
             for word in document:
                 stem_word = self.stems[word]
-                if (stem_word) and (len(stem_word) > 2) and (stem_word not in stopwords):
+                if stem_word and (len(stem_word) > 2) and (stem_word not in stopwords):
                     if stem_word in frequencies:
                         frequencies[stem_word] += 1
                     else:
@@ -113,6 +128,9 @@ class Corpus:
         self.vocab_size = len(self.word_to_index)
 
     def text_to_matrix(self):
+        """
+        Converts a preprocessed vocabulary and a corpus into a document word matrix.
+        """
         self.word_count_mat = np.zeros((self.corpus_size, self.vocab_size), np.int)
 
         for i, doc in enumerate(self.corpus):
@@ -135,7 +153,7 @@ class Corpus:
         self.vocab_size = len(self.word_to_index)
 
     def read_stems(self):
-        with open(self.stem_file, "rb") as f:
+        with open(self.stems_file, "rb") as f:
             self.stems = pickle.loads(f.read())
 
     def save_vocabulary(self):

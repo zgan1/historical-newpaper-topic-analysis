@@ -2,7 +2,17 @@ import numpy as np
 from numba import njit, prange
 
 
-def train(doc_word_mat, n_topics, eps=1e-5, max_iter=100):
+def train(doc_word_mat, n_topics, max_iter=100):
+    """
+    Wrapper function for training a corpus using pLSA. To save computation time, training
+    uses maximum number of iterations as the stopping criterion.
+    :param doc_word_mat: a document word matrix stored as a sparse matrix
+    :param n_topics: number of topics to be trained
+    :param max_iter: Maximum number of iteration before the EM algorithm stops
+    :return: likelihood function value when the training stops
+    :return: word_given_topic matrix
+    :return topic_given_word matrix
+    """
     doc = doc_word_mat.row
     word = doc_word_mat.col
     freq = doc_word_mat.data
@@ -11,11 +21,22 @@ def train(doc_word_mat, n_topics, eps=1e-5, max_iter=100):
     word_given_topic = np.random.rand(doc_word_mat.shape[1], n_topics)
     topic_given_doc = np.random.rand(n_topics, doc_word_mat.shape[0])
 
-    return plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, eps, max_iter)
+    return plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, max_iter)
 
 
 @njit(parallel=True)
-def plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, eps, max_iter):
+def plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, max_iter):
+    """
+    Runs the EM algorithm for pLSA.
+    :param doc: row indices of the document word matrix
+    :param word: col indices of the document word matrix
+    :param freq: entries of the document word matrix
+    :param word_given_topic: initialized word_given_topic matrix
+    :param topic_given_doc: initialized topic_given_doc matrix
+    :param max_iter: the maximum number of iterations before the EM algorithm stops
+    :return: word_given_topic matrix
+    :return topic_given_word matrix
+    """
     n_topics, n_docs = topic_given_doc.shape
     n_words = word_given_topic.shape[0]
     nnz = freq.size
@@ -34,7 +55,6 @@ def plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, eps, max_ite
     doc_prob = doc_prob / np.sum(doc_prob)
 
     iter = 0
-    likelihood = 0
     while True:
         # Expectation step
         nnz_sum[:] = 0
@@ -71,19 +91,6 @@ def plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, eps, max_ite
             for d in range(n_docs):
                 topic_given_doc[t, d] /= 1e-20 + doc_sum[d]
 
-        # # Compute likelihood
-        # old_likelihood = likelihood
-        #
-        # likelihood = 0
-        # for i in range(nnz):
-        #     update = 0
-        #     for t in range(n_topics):
-        #         update += word_given_topic[word[i], t] * topic_given_doc[t, doc[i]]
-        #     likelihood += freq[i] * update * doc_prob[doc[i]]
-        #
-        # #Decide if algorithm should stop
-        # if (iter > 0) and (abs(likelihood - old_likelihood) < eps or iter == max_iter):
-        #     break
         if iter == max_iter:
             break
         iter += 1
