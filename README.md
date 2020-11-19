@@ -25,5 +25,5 @@ consistency.py [depends on model.py]:
 
 Computes and plots various consistency measures. The results are saved in the 'consistency' and 'self_consistency' folders.
 Consistency measures the similarity between topics treating each topic as a unit vector(k-means, normalized using L2 norm) or a probablity mass function
-(pLSA, LDA normalized using L2 norm). In the "consistency" folder are the comparisons between topics across two models. 
+(pLSA, LDA normalized using L1 norm). In the "consistency" folder are the comparisons between topics across two models. 
 In the "self_consistency" folder are the comparisons of topics within a model.
