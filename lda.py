@@ -89,21 +89,3 @@ def gibbs_sampling(N, vocab_size, n_topics, doc, word, topic, prob,
             topic_doc[topic[i], doc[i]] += 1
             word_topic[word[i], topic[i]] += 1
             topic_count[topic[i]] += 1
-
-
-def main():
-    mat = sparse.coo_matrix(np.array([[12, 8, 4, 0, 1, 1],
-                                      [14, 7, 9, 1, 0, 0],
-                                      [18, 9, 6, 1, 1, 1],
-                                      [1, 0, 1, 19, 21, 16],
-                                      [0, 1, 0, 32, 26, 10]]))
-
-    likelihood, word_given_topic, _ = train(doc_word_mat=mat, n_topics=2, alpha=2, beta=0.01, n_iter=100,
-                                            plot_likelihood=False, plot_file='plot.png')
-
-    print(word_given_topic)
-    print(likelihood)
-
-
-if __name__ == "__main__":
-    main()

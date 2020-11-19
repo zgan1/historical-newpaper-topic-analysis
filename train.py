@@ -166,7 +166,7 @@ def main(n_topics=[5],
 
 
 if __name__ == "__main__":
-    main(corpus_names=['National_Gazette', 'Gazette_of_US', 'Pennsylvania_Gazette'],
+    main(corpus_names=['National_Gazette', 'Gazette_of_US'],
          n_topics=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
          n_common_words=30,
          plsa_runs=0,
