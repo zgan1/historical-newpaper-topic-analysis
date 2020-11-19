@@ -6,8 +6,8 @@ import pickle
 
 class Model:
     """
-    Collects information of a model used to assess the between and within model topic consistency
-    in consistency.py.
+    Implements utility functions to collect information of a model used to assess the between and within model topic
+    consistency in consistency.py.
     """
     def __init__(self, model_name="", corpus_name="", n_topics=0, dir=""):
         self.name = model_name
