@@ -1,4 +1,6 @@
-This file gives a short description of what each Python script does.
+The purpose of this project is to extract topics from historical newspapers. Reading historical newspapers to study history is difficult because the sheer volume proves to a challenge to a human reader. Machine learning algorithms can automatically generate topics from these newspapers and can potentially save the historican a large amount of time. The results are saved in the top_words folder.
+
+Here is a short description of what each Python script does.
 
 
 corpus.py:
