@@ -29,9 +29,7 @@ class Corpus:
         self.vocab_size = 0
 
     def create_corpus(self):
-        """
-        Creates a corpus from a list of files.
-        """
+        # Creates a corpus from a list of files.
         for file_path in self.raw_corpus:
             with open(file_path, encoding='utf8') as f_input:
                 doc = nltk.wordpunct_tokenize(f_input.read())
@@ -45,10 +43,8 @@ class Corpus:
         print("done.")
 
     def spellchecking(self, raw_vocab):
-        """
-        :param raw_vocab: a set raw vocabularies to be preprocessed.
-        :return: a dictionary from the raw vocabulary to the corrected vocabulary.
-        """
+        # takes in a set of raw vocabularies and returns a dictionary of raw to correct vocabulary
+        # uses symspell
         sym_spell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
         dictionary_path = pkg_resources.resource_filename(
             "symspellpy", "frequency_dictionary_en_82_765.txt")
@@ -69,9 +65,7 @@ class Corpus:
         return raw_to_correct
 
     def get_raw_vocabulary(self):
-        """
-        Gets the raw vocabulary of a corpus.
-        """
+        # Gets the raw vocabulary of a corpus.
         raw_vocab = set()
         for document in self.corpus:
             for word in document:
@@ -84,20 +78,14 @@ class Corpus:
             self.stopwords = stopwords.read().split()
 
     def preprocess(self):
-        """
-        preprocess a corpus to get the vocabulary of a corpus.
-        """
+        # preprocesses a corpus to get the vocabulary of a corpus.
         raw_vocab = self.get_raw_vocabulary()
         raw_to_correct = self.spellchecking(raw_vocab)
         self.get_vocabulary(self.stopwords, raw_to_correct)
 
     def get_vocabulary(self, stopwords, raw_to_correct):
-        """
-        Performs stemming and frequency capping for a vocabulary. Generates a index to word dictionary
-        and a word to index dictionary.
-        :param stopwords: a list of stopwords
-        :param raw_to_correct: a raw vocabulary to corrected vocabulary dictionary
-        """
+        # Performs stemming and frequency capping for a vocabulary. Generates a index to word dictionary
+        # and a word to index dictionary.
         frequencies = {}
         porter = nltk.PorterStemmer()
         for document in self.corpus:
@@ -128,9 +116,7 @@ class Corpus:
         self.vocab_size = len(self.word_to_index)
 
     def text_to_matrix(self):
-        """
-        Converts a preprocessed vocabulary and a corpus into a document word matrix.
-        """
+        converts a preprocessed vocabulary and a corpus into a document word matrix.
         self.word_count_mat = np.zeros((self.corpus_size, self.vocab_size), np.int)
 
         for i, doc in enumerate(self.corpus):
@@ -161,4 +147,6 @@ class Corpus:
             pickle.dump(self.word_to_index, f)
 
     def save_document_word_matrix(self):
+        # saves the document word matrix to be processed by machine learning models
+        # the end of the preprocessing stage
         sparse.save_npz(self.matrix_file, sparse.coo_matrix(self.word_count_mat))

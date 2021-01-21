@@ -87,19 +87,5 @@ class Model:
             print(f"Doc to topic array: {self.doc_to_topic.shape}")
             print("")
 
-    def docs_containing(self, list_words):
-        """
-        Returns a numpy array of shape (n_topics,) giving the number of documents in each topic containing all the words
-        in list_words.
-        """
-        freqs = np.zeros(self.n_topics, dtype=np.int)
 
-        indices = [self.word_to_index[w] for w in list_words if w in self.word_to_index]
-        n = len(indices)
-        if n > 0:
-            word_count = np.count_nonzero(self.doc_word_matrix.toarray()[:, indices], axis=1)
-            for t in self.doc_to_topic[word_count == n]:
-                freqs[t] += 1
-
-        return freqs
 

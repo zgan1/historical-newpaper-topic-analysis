@@ -4,14 +4,16 @@ from numba import njit, prange
 
 def train(doc_word_mat, n_topics, max_iter=100):
     """
-    Wrapper function for training a corpus using pLSA. To save computation time, training
+    wrapper function for training a corpus using pLSA. To save computation time, training
     uses maximum number of iterations as the stopping criterion.
-    :param doc_word_mat: a document word matrix stored as a sparse matrix
-    :param n_topics: number of topics to be trained
-    :param max_iter: Maximum number of iteration before the EM algorithm stops
-    :return: likelihood function value when the training stops
-    :return: word_given_topic matrix
-    :return topic_given_word matrix
+    Args:
+        doc_word_mat: a document word matrix stored as a sparse matrix
+        n_topics: number of topics to be trained
+        max_iter: Maximum number of iteration before the EM algorithm stops
+    Returns:
+        likelihood function value when the training stops
+        word_given_topic matrix
+        topic_given_word matrix
     """
     doc = doc_word_mat.row
     word = doc_word_mat.col
@@ -27,15 +29,17 @@ def train(doc_word_mat, n_topics, max_iter=100):
 @njit(parallel=True)
 def plsa_sparse(doc, word, freq, word_given_topic, topic_given_doc, max_iter):
     """
-    Runs the EM algorithm for pLSA.
-    :param doc: row indices of the document word matrix
-    :param word: col indices of the document word matrix
-    :param freq: entries of the document word matrix
-    :param word_given_topic: initialized word_given_topic matrix
-    :param topic_given_doc: initialized topic_given_doc matrix
-    :param max_iter: the maximum number of iterations before the EM algorithm stops
-    :return: word_given_topic matrix
-    :return topic_given_word matrix
+    runs the EM algorithm for pLSA.
+    Args:
+        doc: row indices of the document word matrix
+        word: col indices of the document word matrix
+        freq: entries of the document word matrix
+        word_given_topic: initialized word_given_topic matrix
+        topic_given_doc: initialized topic_given_doc matrix
+        max_iter: the maximum number of iterations before the EM algorithm stops
+    Returns:
+        word_given_topic matrix
+        topic_given_word matrix
     """
     n_topics, n_docs = topic_given_doc.shape
     n_words = word_given_topic.shape[0]

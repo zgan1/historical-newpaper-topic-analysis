@@ -8,6 +8,7 @@ def normalize_rows(v):
 
 def train(matrix, n_clusters, eps=1e-9, max_iter=100):
     """
+    trains a k-means model
     Args:
         matrix: scipy.sparse.coo_matrix of shape (n,d). Each row represents a data point.
         n_clusters: The desired number of clusters.

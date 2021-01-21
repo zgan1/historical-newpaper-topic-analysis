@@ -8,15 +8,17 @@ import time
 
 def train(doc_word_mat, n_topics, alpha, beta, n_iter, plot_likelihood=False, plot_file=''):
     """
-    Trains a corpus using LDA.
-    :param doc_word_mat: document word matrix of a corpus
-    :param n_topics: number of topics for the model
-    :param alpha: hyperparameter of the model
-    :param beta: hyperparameter of the model
-    :param plot_likelihood: whether to plot likelihood function against number of iterations
-    :return: likelihood function value when the training stops
-    :return: word_given_topic matrix
-    :return topic_given_word matrix
+    trains a Latent Dirichlet Allocation (LDA) model.
+    Args:
+        doc_word_mat: document word matrix of a corpus
+        n_topics: number of topics for the model
+        alpha: hyperparameter of the model
+        beta: hyperparameter of the model
+        plot_likelihood: whether to plot likelihood function against number of iterations
+    Returns:
+         likelihood function value when the training stops
+         word_given_topic matrix
+         topic_given_word matrix
     """
     N = np.sum(doc_word_mat.data)
     n_docs = doc_word_mat.shape[0]
@@ -33,6 +35,7 @@ def train(doc_word_mat, n_topics, alpha, beta, n_iter, plot_likelihood=False, pl
     topic_count = np.zeros((n_topics))
     initialize(N, topic_doc, word_topic, topic_count, doc, word, topic)
 
+    # for plotting the likelihood for monitoring
     if plot_likelihood:
         n_points = 400
         step = n_iter // n_points

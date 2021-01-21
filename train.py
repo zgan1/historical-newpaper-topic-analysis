@@ -1,3 +1,6 @@
+"""
+The training routine. Implements the main function.
+"""
 import pLSA
 import k_means
 import lda
@@ -12,6 +15,7 @@ import matplotlib.pyplot as plt
 
 
 def train(model_name, n_topics, n_runs, doc_word_matrix, model_file, topic_doc_file):
+    # trains a model given a doc_word_matrix
     if n_runs == 0 or (model_name not in ["pLSA", "k_means", "lda"]):
         return
 
@@ -48,6 +52,7 @@ def train(model_name, n_topics, n_runs, doc_word_matrix, model_file, topic_doc_f
 
 
 def save_common_words(model_name, n, model_file, topic_doc_file, doc_sizes, index, output_file):
+    # find the most common (as measured by the model) words of a topic
     with open(model_file, 'rb') as f:
         word_given_topic = pickle.loads(f.read())
         if model_name == "k_means":
