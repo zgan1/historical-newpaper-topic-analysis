@@ -18,7 +18,7 @@ def train(doc_word_mat, n_topics, alpha, beta, n_iter, plot_likelihood=False, pl
     Returns:
          likelihood function value when the training stops
          word_given_topic matrix
-         topic_given_word matrix
+         topic_given_doc matrix
     """
     N = np.sum(doc_word_mat.data)
     n_docs = doc_word_mat.shape[0]
@@ -41,7 +41,7 @@ def train(doc_word_mat, n_topics, alpha, beta, n_iter, plot_likelihood=False, pl
         step = n_iter // n_points
         iterations = [step * (i + 1) for i in range(n_points)]
         likelihoods = []
-        for i in range(n_points):
+        for _ in range(n_points):
             gibbs_sampling(N, vocab_size, n_topics, doc, word, topic, prob,
                            topic_doc, word_topic, topic_count, alpha/n_topics, beta, step)
             likelihoods.append(-np.mean(sc.gammaln(word_topic + beta).sum(axis=0)

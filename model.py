@@ -7,7 +7,7 @@ import pickle
 class Model:
     """
     Implements utility functions to collect information of a model used to assess the between and within model topic
-    consistency in consistency.py.
+    consistency in consistency.py. It is used after a model is trianed.
     """
     def __init__(self, model_name="", corpus_name="", n_topics=0, dir=""):
         self.name = model_name
@@ -62,10 +62,12 @@ class Model:
                 self.doc_to_topic = np.argmax(self.topic_doc, axis=0)
 
     def change_to(self, new_model_name, new_n_topics=0):
+        # set the current model to another model
         self.name = new_model_name
         self.set_n_topics(new_n_topics)
 
     def set_n_topics(self, new_n_topics):
+        # change the number of topic given a model
         self.n_topics = new_n_topics
 
         if new_n_topics > 0:
